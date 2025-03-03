@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+    application:
+        name: nbms
+    # .env 사용 설정
+    config:
+        import: optional:file:.env[.properties]
+    # DataBase 연결 정보
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: ${DB_URL}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+        hikari:
+            maximum-pool-size: 10
+            minimum-idle: 5
+    servlet:
+        multipart:
+            max-file-size: 100MB
+            max-request-size: 110MB
+
+# MyBatis 설정
+mybatis:
+    configuration:
+        # Automatically map underscores in database column names to camelCase in Java beans
+        map-underscore-to-camel-case: true
+        call-setters-on-nulls: true
+        jdbc-type-for-null: varchar
+        default-fetch-size: 100
+    # Location for MyBatis mapper XML files
+    mapper-locations: classpath:mybatis/mappers/**/*Mapper.xml
+    # Location for MyBatis model classes (alias package)
+    type-aliases-package: com.nexblue.nbms.web.dto
