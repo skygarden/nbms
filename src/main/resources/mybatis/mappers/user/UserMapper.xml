@@ -23,7 +23,7 @@
             CREATE_USER,
             UPDATE_DATE,
             UPDATE_USER
-        FROM nbms_user_inf
+        FROM NBMS_USER_INF
     </select>
 
 </mapper>
