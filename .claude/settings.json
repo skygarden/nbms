@@ -1,0 +1,224 @@
+{
+  "name": "NBMS Development Harness",
+  "description": "NBMS 프로젝트 개발 하네스 - 5계층 구조",
+  "version": "1.0.0",
+
+  "context_window": {
+    "max_context_tokens": 32000,
+    "maintain_format": true
+  },
+
+  "permissions": {
+    "read": ["allow"],
+    "write": ["ask"],
+    "edit": ["ask"],
+    "bash": ["ask"],
+    "delete": ["deny"]
+  },
+
+  "restricted_paths": {
+    "deny": [
+      ".env",
+      "*.key",
+      "secrets.yml",
+      "application-secrets.yml",
+      ".git/config",
+      "node_modules",
+      "build",
+      "dist",
+      "target"
+    ],
+    "ask": [
+      "src/main/resources/application.yml",
+      "src/main/resources/application.properties",
+      "package.json",
+      "build.gradle",
+      "pom.xml",
+      ".gitignore",
+      "docker-compose.yml",
+      "Dockerfile"
+    ]
+  },
+
+  "allowed_tools": [
+    "read",
+    "write",
+    "edit",
+    "bash",
+    "glob",
+    "grep"
+  ],
+
+  "bash_restrictions": {
+    "blocked_commands": [
+      "rm -rf",
+      "dd",
+      "mkfs",
+      "shutdown",
+      "reboot",
+      "sudo",
+      "git push",
+      "git force-push",
+      "docker push",
+      "docker deploy"
+    ],
+    "restricted_commands": {
+      "./gradlew bootJar": "need_approval",
+      "./gradlew bootBuildImage": "need_approval",
+      "npm run build": "allow",
+      "flyway*": "need_approval"
+    }
+  },
+
+  "hooks": {
+    "pre-bash": {
+      "description": "bash 명령 실행 전 검증",
+      "enabled": true,
+      "rules": [
+        {
+          "command": "^(git|docker|flyway).*",
+          "action": "ask",
+          "message": "⚠️ 이 명령은 리뷰가 필요합니다. 정말 실행할까요?"
+        },
+        {
+          "command": "rm",
+          "action": "deny",
+          "message": "❌ 파일 삭제는 허용되지 않습니다."
+        }
+      ]
+    },
+    "post-write": {
+      "description": "파일 작성 후 자동 검증",
+      "enabled": true,
+      "rules": [
+        {
+          "pattern": "**/*.java",
+          "command": "./gradlew spotlessApply",
+          "message": "Java 포매팅 적용 중..."
+        },
+        {
+          "pattern": "**/*.{vue,tsx,ts}",
+          "command": "npx prettier --write",
+          "message": "코드 포매팅 중..."
+        }
+      ]
+    },
+    "pre-edit": {
+      "description": "파일 편집 전 확인",
+      "enabled": true,
+      "rules": [
+        {
+          "pattern": "src/main/resources/*.yml",
+          "action": "warn",
+          "message": "⚠️ 설정 파일 수정. 다른 팀원에게 알렸나요?"
+        }
+      ]
+    }
+  },
+
+  "code_quality": {
+    "backend": {
+      "linter": "checkstyle",
+      "formatter": "spotless",
+      "test_runner": "gradle test",
+      "build_command": "./gradlew clean build"
+    },
+    "frontend": {
+      "linter": "eslint",
+      "formatter": "prettier",
+      "test_runner": "npm run test",
+      "build_command": "npm run build"
+    }
+  },
+
+  "memory_settings": {
+    "auto_save": true,
+    "save_interval": 600,
+    "memory_files": [
+      "MEMORY.md",
+      "ERRORS.md",
+      "PROGRESS.md"
+    ]
+  },
+
+  "slash_commands": {
+    "/build": {
+      "description": "프로젝트 빌드 및 테스트",
+      "command": "./gradlew clean build && npm run build"
+    },
+    "/test": {
+      "description": "전체 테스트 실행",
+      "command": "./gradlew test && npm run test"
+    },
+    "/review": {
+      "description": "코드 리뷰 시작",
+      "skill": "code-review-backend",
+      "message": "코드 리뷰를 위해 git diff 또는 변경 파일을 제공해주세요."
+    },
+    "/api-create": {
+      "description": "새 API 엔드포인트 생성",
+      "skill": "backend-api-development",
+      "message": "API 목적, 요청/응답 형식을 설명해주세요."
+    },
+    "/component-create": {
+      "description": "새 컴포넌트 생성",
+      "skill": "frontend-component-development",
+      "message": "컴포넌트 유형과 기능을 설명해주세요."
+    },
+    "/db-migrate": {
+      "description": "데이터베이스 마이그레이션",
+      "skill": "database-migration",
+      "message": "변경 목적과 스키마 변경 사항을 설명해주세요."
+    }
+  },
+
+  "subagents": {
+    "backend-developer": {
+      "description": "백엔드 개발 전담 에이전트",
+      "allowed_tools": ["read", "edit", "write", "bash"],
+      "skills": ["backend-api-development", "database-migration"],
+      "context": "backend/**"
+    },
+    "frontend-developer": {
+      "description": "프론트엔드 개발 전담 에이전트",
+      "allowed_tools": ["read", "edit", "write", "bash"],
+      "skills": ["frontend-component-development"],
+      "context": "frontend/**"
+    },
+    "code-reviewer": {
+      "description": "독립 코드 리뷰 에이전트",
+      "allowed_tools": ["read", "grep"],
+      "skills": ["code-review-backend"],
+      "context": "all",
+      "note": "읽기 전용 모드로 독립 검토"
+    }
+  },
+
+  "git_integration": {
+    "auto_commit": false,
+    "require_approval_for": [
+      "git commit",
+      "git push",
+      "git merge"
+    ],
+    "commit_message_format": "{type}: {description}",
+    "types": [
+      "feat",
+      "fix",
+      "refactor",
+      "docs",
+      "style",
+      "test",
+      "chore"
+    ]
+  },
+
+  "output_preferences": {
+    "code_block_language": "auto",
+    "show_file_paths": true,
+    "show_line_numbers": true,
+    "max_suggestions": 3,
+    "tone": "professional",
+    "language": "ko"
+  }
+}
