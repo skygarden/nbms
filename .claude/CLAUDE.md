@@ -3,10 +3,12 @@
 ## 프로젝트 설명
 
 NBMS(Next Blue Management System)는 기업 운영 관리를 위한 통합 시스템입니다.
-- **Backend**: Spring Boot 3.x + Gradle + MyBatis + JWT
-- **Frontend**: Vite + Vue 3 (또는 React) + TypeScript
-- **Database**: PostgreSQL (운영환경) / H2 (개발환경)
-- **배포**: Docker + Kubernetes
+- **Backend**: Spring Boot 4.1.0 + Gradle + MyBatis + JWT
+  - 경로: `C:\Dev\new_nbms_workspace\new-nbms\nbms`
+- **Frontend**: Vite + React + TypeScript
+  - 경로: `C:\Dev\new_nbms_workspace\new-nbms\nbms-fe`
+- **Database**: MySQL 8.4.0 (운영/개발/테스트)
+- **배포**: Gradle 기반 배포 (`./gradlew bootJar`)
 
 ## 대화 방식
 
@@ -25,23 +27,23 @@ NBMS(Next Blue Management System)는 기업 운영 관리를 위한 통합 시�
 ## 기술 스택 (고정)
 
 ### Backend
-- **Language**: Java 17+
-- **Framework**: Spring Boot 3.x
+- **Language**: Java 21
+- **Framework**: Spring Boot 4.1.0
 - **Build**: Gradle 8.x
 - **ORM**: MyBatis (with MyBatis-Plus 선택사항)
 - **Security**: Spring Security + JWT (jjwt 라이브러리)
-- **Database**: PostgreSQL 14+
+- **Database**: MySQL 8.4.0 (dev, prod, test)
 - **Logging**: SLF4J + Logback
 - **Testing**: JUnit 5 + Mockito
 
 ### Frontend
-- **Framework**: Vue 3 (또는 프로젝트 선택)
+- **Framework**: React
 - **Build Tool**: Vite 5.x
 - **Language**: TypeScript 5.x
 - **Package Manager**: npm
 - **Linting**: ESLint
 - **Formatting**: Prettier
-- **Testing**: Vitest (선택사항)
+- **Testing**: Vitest
 
 ## 개발 규칙 (Karpathy Rules 준용)
 
@@ -117,7 +119,7 @@ npm run test
 - **DTO/Entity 변경**: MyBatis 매퍼 파일도 함께 업데이트 필수
 - **API 엔드포인트 추가**: 문서(docs/api.md) 업데이트 필수
 - **권한/인증 로직**: 모든 변경 전에 기존 테스트 실행 필수
-- **데이터베이스 연결**: 테스트 데이터베이스(H2)에서 먼저 검증
+- **데이터베이스 연결**: MySQL 테스트 DB에서 먼저 검증
 
 ### Frontend 코드
 - **컴포넌트 추가**: 스토리북 등재 (있는 경우) 또는 문서 추가
@@ -147,7 +149,7 @@ npm run test
 
 다음 행동은 현재 세션의 명시적 승인 필수:
 
-1. **배포 관련**: `./gradlew bootJar`, docker build & push
+1. **배포 관련**: `./gradlew bootJar` (JAR 파일 생성)
 2. **데이터베이스**: 마이그레이션, 테이블 삭제, 데이터 수정 쿼리
 3. **기존 API 변경**: 엔드포인트 경로 변경, 요청/응답 필드 제거
 4. **의존성 업그레이드**: 메이저 버전 업그레이드
@@ -156,8 +158,8 @@ npm run test
 ## 팀 정보
 
 - **Backend Team**: Spring Boot 기반 API 개발
-- **Frontend Team**: Vue/React 기반 UI 개발
-- **DevOps**: Docker, Kubernetes 배포
+- **Frontend Team**: React 기반 UI 개발
+- **DevOps**: Gradle 기반 빌드/배포 관리
 - **QA**: 통합 테스트, 성능 테스트
 
 모르는 것이 있으면 팀에 먼저 물어보기!
